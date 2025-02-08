@@ -28,14 +28,9 @@
                             <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Phone</th>
                             <th>Status</th>
-                            {% if title == 'All Delegates' %}
+                            <th>Category</th>
                             <th>Actions</th>
-                            {% endif %}
-                            {% if title == 'Paid Delegates' %}
-                            <th>Actions</th>
-                            {% endif %}
                         </thead>
                         <tbody>
                             {% for delegate in page_obj %}
@@ -43,12 +38,12 @@
                                 <td>{{ delegate.id }}</td>
                                 <td>{{ delegate.name }}</td>
                                 <td>{{ delegate.email }}</td>
-                                <td>{{ delegate.phone }}</td>
                                 <td>{{ delegate.status }}</td>
+                                <td>{{ delegate.delegate_type }}</td>
                                 <td>
                                     {% if user.role == 'admin' or user.role == 'finance' %}
                                         {% if delegate.has_paid %}
-                                            <button class="btn btn-success btn-sm" disabled>Already Verified</button>
+                                            <button class="btn btn-success btn-sm">Update Payment</button>
                                         {% else %}
                                             <a href="{% url 'core:verify_payment' delegate.id %}" class="btn btn-success btn-sm">Verify Payment</a>
                                         {% endif %}

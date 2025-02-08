@@ -109,17 +109,24 @@ def paid_delegates(request):
 @login_required
 def verify_payment(request, delegate_id):
     delegate = get_object_or_404(Delegate, id=delegate_id)
+    payment = Payment.objects.filter(delegate=delegate).first()  # Get existing payment if it exists
+
     if request.method == 'POST':
-        form = PaymentForm(request.POST)
+        form = PaymentForm(request.POST, instance=payment)  # Use existing payment as instance if available
         if form.is_valid():
             payment = form.save(commit=False)
             payment.delegate = delegate
-            payment.verified = True
+            payment.verified = True  # Mark as verified upon any update
             payment.save()
-            messages.success(request, 'Payment verified successfully.')
-            return redirect('core:all_delegates')
+            delegate.has_paid = True
+            delegate.save()
+            messages.success(request, 'Payment details updated successfully.')
+            return redirect(reverse('core:all_delegates_list'))
+        else:
+            messages.error(request, 'There was an error updating the payment details.')
     else:
-        form = PaymentForm()
+        form = PaymentForm(instance=payment)  # Populate form with existing payment data if available
+
     return render(request, 'core/verify_payment.html', {'form': form, 'delegate': delegate})
 
 
@@ -253,14 +260,16 @@ def assign_delegate(request, delegate_id):
                 'country': country,
                 'whatsapp_group_link': 'https://chat.whatsapp.com/IvIaqagrsxb956nFIRko7F',  # Replace with your actual WhatsApp group link
             }
-            message = render_to_string('core/assignment_email.html', context)
+            html_message = render_to_string('core/assignment_email.html', context)
+
             email = EmailMessage(
                 subject=subject,
-                body=message,
-                from_email='contact.johnjlawal@gmail.com',  # Replace with your sending email address
+                body=html_message,
+                from_email='ruimundelegates2021@gmail.com',  # Replace with your sending email address
                 to=[delegate.email],
             )
-            email.send(fail_silently=False)
+            email.content_subtype = "html"  # Set content type to HTML
+            email.send(fail_silently=True)
 
             return HttpResponseRedirect(reverse('core:paid_delegates'))
 

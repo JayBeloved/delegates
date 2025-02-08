@@ -86,12 +86,13 @@ class Payment(models.Model):
     PAYMENT_METHOD_CHOICES = [
         ('Bank Transfer', 'Bank Transfer'),
         ('Portal', 'Portal'),
+        ('Remita', 'Remita'),
     ]
 
     AMOUNT_CHOICES = [
         ('Full', 'Full'),
         ('30000', '30,000'),
-        ('60000', '60,000'),
+        ('25000', '25,000'),
     ]
 
     delegate = models.ForeignKey(Delegate, on_delete=models.CASCADE)

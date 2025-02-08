@@ -1,0 +1,69 @@
+<div class="sidebar" data-color="purple" data-background-color="white" data-image="/static/assets/img/sidebar-1.jpg">
+  <div class="logo">
+    <a target="_blank" rel="noopener noreferrer" 
+       href="{url 'core:dashboard'}" class="simple-text logo-normal">
+      RUIMUN
+    </a>
+  </div>
+  <div class="sidebar-wrapper">
+    <ul class="nav">
+      {% if request.user.is_authenticated %}
+        <li class="nav-item {% if 'dashboard' in request.path %} active {% endif %}">
+          <a class="nav-link" href="{% url 'core:dashboard' %}">
+            <i class="material-icons">dashboard</i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+        <li class="nav-item {% if 'delegates' in request.path %} active {% endif %}">
+          <a class="nav-link" data-toggle="collapse" href="#delegatesMenu" aria-expanded="false">
+            <i class="material-icons">people</i>
+            <p>Delegates</p>
+          </a>
+          <div class="collapse" id="delegatesMenu">
+            <ul class="nav">
+              <li class="nav-item {% if 'all-delegates' in request.path %} active {% endif %}">
+                <a class="nav-link" href="{% url 'core:all_delegates' %}">
+                  <i class="material-icons">list</i>
+                  <p>All Delegates</p>
+                </a>
+              </li>
+              <li class="nav-item {% if 'paid-delegates' in request.path %} active {% endif %}">
+                <a class="nav-link" href="{% url 'core:paid_delegates' %}">
+                  <i class="material-icons">paid</i>
+                  <p>Paid Delegates</p>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+        <li class="nav-item {% if 'assignments' in request.path %} active {% endif %}">
+          <a class="nav-link" href="{% url 'core:assignment_list' %}">
+            <i class="material-icons">assignment</i>
+            <p>Assignments</p>
+          </a>
+        </li>
+        <li class="nav-item {% if 'upload' in request.path %} active {% endif %}">
+          <a class="nav-link" href="{% url 'core:upload' %}">
+            <i class="material-icons">cloud_upload</i>
+            <p>Upload Data</p>
+          </a>
+        </li>
+        <li class="nav-item ">
+          <a class="nav-link" href="{% url 'logout' %}">
+            <i class="material-icons">directions_run</i>
+            <p>Logout</p>
+          </a>
+        </li>
+      {% else %}
+        {% comment %} <li class="nav-item active">
+          <a class="nav-link" 
+             target="_blank" rel="noopener noreferrer"  
+             href="https://appseed.us/admin-dashboards/django-dashboard-material-pro">
+            <i class="material-icons">unarchive</i>
+            <p>PRO Version</p>
+          </a>
+        </li> {% endcomment %}
+      {% endif %}
+    </ul>
+  </div>
+</div>

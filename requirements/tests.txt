@@ -1,0 +1,8 @@
+-r base.txt
+
+black
+coverage
+factory-boy
+flake8
+isort
+tox

@@ -1,0 +1,100 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{ title }} {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">{{ title }}</h4>
+                <p class="card-category">{{ description }}</p>
+                <form method="get" action="">
+                    <div class="input-group no-border">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search...">
+                        <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                            <i class="material-icons">search</i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="text-primary">
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            {% if title == 'All Delegates' %}
+                            <th>Actions</th>
+                            {% endif %}
+                            {% if title == 'Paid Delegates' %}
+                            <th>Actions</th>
+                            {% endif %}
+                        </thead>
+                        <tbody>
+                            {% for delegate in page_obj %}
+                            <tr>
+                                <td>{{ delegate.id }}</td>
+                                <td>{{ delegate.name }}</td>
+                                <td>{{ delegate.email }}</td>
+                                <td>{{ delegate.phone }}</td>
+                                <td>{{ delegate.status }}</td>
+                                <td>
+                                    {% if user.role == 'admin' or user.role == 'finance' %}
+                                        {% if delegate.has_paid %}
+                                            <button class="btn btn-success btn-sm" disabled>Already Verified</button>
+                                        {% else %}
+                                            <a href="{% url 'core:verify_payment' delegate.id %}" class="btn btn-success btn-sm">Verify Payment</a>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if user.role == 'admin' or user.role == 'delegates_affairs' %}
+                                        <a href="{% url 'core:update_delegate' delegate.id %}" class="btn btn-warning btn-sm">Update Details</a>
+                                    {% endif %}
+
+                                    {% if user.role == 'admin' or user.role == 'delegates_affairs' %}
+                                        {% if delegate.status == 'Assigned' %}
+                                            <a href="{% url 'core:assign_delegate' delegate.id %}" class="btn btn-info btn-sm">Re-Assign</a>
+                                        {% else %}
+                                            <a href="{% url 'core:assign_delegate' delegate.id %}" class="btn btn-info btn-sm">Assign</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1">&laquo; first</a>
+                            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+
+                        <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

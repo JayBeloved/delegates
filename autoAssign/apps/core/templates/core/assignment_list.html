@@ -1,0 +1,74 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Assignment List {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">Assignment List</h4>
+                <p class="card-category">Here is a list of all assignments</p>
+                <form method="get" action="">
+                    <div class="input-group no-border">
+                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search...">
+                        <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                            <i class="material-icons">search</i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="text-primary">
+                            <th>ID</th>
+                            <th>Delegate</th>
+                            <th>Committee</th>
+                            <th>Country</th>
+                            <th>Action</th>
+                        </thead>
+                        <tbody>
+                            {% for assignment in page_obj %}
+                            <tr>
+                                <td>{{ assignment.id }}</td>
+                                <td>{{ assignment.delegate.name }}</td>
+                                <td>{{ assignment.committee }}</td>
+                                <td>{{ assignment.country }}</td>
+                                <td>
+                                    <a href="{% url 'core:assign_delegate' assignment.delegate.id %}" class="btn btn-info btn-sm">Re-Assign</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                            <a href="?page=1">&laquo; first</a>
+                            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                        {% endif %}
+
+                        <span class="current">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                        {% endif %}
+                        <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

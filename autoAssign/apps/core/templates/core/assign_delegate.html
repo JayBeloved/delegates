@@ -1,0 +1,165 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %} Assign Delegate {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header card-header-primary">
+                <h4 class="card-title">Assign Delegate</h4>
+                <p class="card-category">Assign a committee and country to the delegate</p>
+                <a href="{% url 'core:paid_delegates' %}" class="btn btn-secondary">Go Back</a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header card-header-primary">
+                                <h4 class="card-title">Delegate Details</h4>
+                                <p class="card-category">Information about the delegate</p>
+                            </div>
+                            <div class="card-body">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Name:</strong> {{ delegate.name }}</p>
+                                            <p><strong>Email:</strong> {{ delegate.email }}</p>
+                                            <p><strong>User Type:</strong> {{ delegate.user_type }}</p>
+                                            <p><strong>Gender:</strong> {{ delegate.gender }}</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p><strong>MUN Experience:</strong> {{ delegate.mun_experience }}</p>
+                                            <p><strong>Affiliation:</strong> {{ delegate.affiliation }}</p>
+                                            <p><strong>Matric Number:</strong> {{ delegate.matric_num }}</p>
+                                            <p><strong>Department:</strong> {{ delegate.department }}</p>
+                                            <p><strong>Status:</strong> {{ delegate.status }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="card-footer">
+                                <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+                            </div> {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card choice-card" data-committee="{{ delegate.committee1 }}" data-country="{{ delegate.country1 }}">
+                            <div class="card-header card-header-info">
+                                <h4 class="card-title">1st Choice</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Committee:</strong> {{ delegate.committee1 }}</p>
+                                <p><strong>Country:</strong> {{ delegate.country1 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card choice-card" data-committee="{{ delegate.committee2 }}" data-country="{{ delegate.country2 }}">
+                            <div class="card-header card-header-info">
+                                <h4 class="card-title">2nd Choice</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Committee:</strong> {{ delegate.committee2 }}</p>
+                                <p><strong>Country:</strong> {{ delegate.country2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card choice-card" data-committee="{{ delegate.committee3 }}" data-country="{{ delegate.country3 }}">
+                            <div class="card-header card-header-info">
+                                <h4 class="card-title">3rd Choice</h4>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Committee:</strong> {{ delegate.committee3 }}</p>
+                                <p><strong>Country:</strong> {{ delegate.country3 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="committee">Committee</label>
+                                <select class="form-control" id="committee" name="committee" onchange="updateCountries()">
+                                    <option value="">Select Committee</option>
+                                    {% for committee in committees %}
+                                    <option value="{{ committee.committee }}" data-countries="{{ committee.get_countries_list|join:',' }}">{{ committee.committee }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="country">Country</label>
+                                <select class="form-control" id="country" name="country">
+                                    <option value="">Select Country</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="preference">Preference</label>
+                                <select class="form-control" id="preference" name="preference">
+                                    <option value="1">1st Choice</option>
+                                    <option value="2">2nd Choice</option>
+                                    <option value="3">3rd Choice</option>
+                                    <option value="0">New</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Assign</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<script>
+    function updateCountries() {
+        const committeeSelect = document.getElementById('committee');
+        const countrySelect = document.getElementById('country');
+        const selectedCommittee = committeeSelect.options[committeeSelect.selectedIndex];
+        const countries = selectedCommittee.getAttribute('data-countries').split(',');
+
+        // Clear the current options
+        countrySelect.innerHTML = '<option value="">Select Country</option>';
+
+        // Add new options
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.trim();
+            option.textContent = country.trim();
+            countrySelect.appendChild(option);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const choiceCards = document.querySelectorAll('.choice-card');
+        choiceCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const committee = card.dataset.committee;
+                const country = card.dataset.country;
+
+                document.getElementById('committee').value = committee;
+                updateCountries();
+                document.getElementById('country').value = country;
+            });
+        });
+    });
+</script>
+{% endblock javascripts %}

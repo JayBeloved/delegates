@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../Payroll/material-dashboard-django-master/material-dashboard-django-master"
+		},
+		{
+			"path": "../Scraper"
+		}
+	],
+	"settings": {
+		"terminal.integrated.environmentChangesIndicator": "on"
+	}
+}

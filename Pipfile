@@ -1,0 +1,33 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+dj-database-url = "*"
+django = "*"
+mysqlclient = "*"
+python-decouple = "*"
+pytz = "*"
+black = "*"
+coverage = "*"
+factory-boy = "*"
+flake8 = "*"
+isort = "*"
+tox = "*"
+django-debug-toolbar = "*"
+ipython = "*"
+load-dotenv = "*"
+mysql-connector-python = "*"
+pymysql = "*"
+bs4 = "*"
+pandas = "*"
+csv = "*"
+openpyxl = "*"
+gunicorn = "*"
+sentry-sdk = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

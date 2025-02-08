@@ -23,6 +23,7 @@ pandas = "*"
 openpyxl = "*"
 gunicorn = "*"
 sentry-sdk = "*"
+whitenoise = "*"
 
 [dev-packages]
 

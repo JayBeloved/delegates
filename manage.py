@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 def main():
     """Run administrative tasks."""
     if os.environ.get('ENV') == 'production':
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sps_project.settings.production")
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "autoAssign.settings.production")
     else:
-        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "sps_project.settings.local")
+        os.environ.setdefault("DJANGO_SETTINGS_MODULE", "autoAssign.settings.local")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

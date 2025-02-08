@@ -3,5 +3,4 @@ Django
 python-decouple
 pytz
 pandas
-csv
 openpyxl

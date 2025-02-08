@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'autoAssign.settings.local')
-if 'ENV' == 'production':
+if os.getenv('ENV') == 'production':
     os.environ['DJANGO_SETTINGS_MODULE'] = 'autoAssign.settings.production'
 
 application = get_asgi_application()

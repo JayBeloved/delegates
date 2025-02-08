@@ -121,7 +121,7 @@ def verify_payment(request, delegate_id):
             delegate.has_paid = True
             delegate.save()
             messages.success(request, 'Payment details updated successfully.')
-            return redirect(reverse('core:all_delegates_list'))
+            return redirect(reverse('core:all_delegates'))
         else:
             messages.error(request, 'There was an error updating the payment details.')
     else:

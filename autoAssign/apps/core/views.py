@@ -188,7 +188,7 @@ def process_delegate_data(data):
             'name': row.get('name'),
             'email': row.get('email'),
             'phone': row.get('phone'),
-            'user_type': row.get('user_type'),
+            'delegate_type': row.get('delegate_type'),
             'gender': row.get('gender'),
             'mun_experience': row.get('mun_experience'),
             'affiliation': row.get('affiliation'),
@@ -265,7 +265,7 @@ def assign_delegate(request, delegate_id):
             email = EmailMessage(
                 subject=subject,
                 body=html_message,
-                from_email='ruimundelegates2021@gmail.com',  # Replace with your sending email address
+                from_email='contact.johnjlawal@gmail.com',  # Replace with your sending email address
                 to=[delegate.email],
             )
             email.content_subtype = "html"  # Set content type to HTML

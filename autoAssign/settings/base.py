@@ -131,7 +131,7 @@ LOGIN_REDIRECT_URL = 'core:dashboard'
 
 STATIC_URL = "/static/"
 
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 

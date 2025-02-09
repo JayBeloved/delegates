@@ -143,15 +143,24 @@ def upload(request):
 
             try:
                 df = pd.read_csv(csv_file)
-                
-                # Process delegate data (existing functionality)
-                process_delegate_data(df)
-                process_committee_data(df)
 
-                # Process payment verification
-                verify_payments_from_csv(df)
+                # Standardize column names (lowercase and strip whitespace)
+                df.columns = [col.lower().strip() for col in df.columns]
 
-                messages.success(request, 'Data uploaded and action successfully carried out.')
+                # Determine the purpose of the file based on its columns
+                if {'name', 'email', 'phone'}.issubset(df.columns):
+                    process_delegate_data(df)
+                    messages.success(request, 'Delegate data uploaded successfully.')
+                elif {'committee', 'country'}.issubset(df.columns):
+                    process_committee_data(df)
+                    messages.success(request, 'Committee data uploaded successfully.')
+                elif {'mails', 'payment method', 'amount'}.issubset(df.columns):
+                    verify_payments_from_csv(df)
+                    messages.success(request, 'Payment verification completed successfully.')
+                else:
+                    messages.error(request, 'Invalid file format. Please upload a file with the correct columns for delegate data, committee data, or payment verification.')
+                    return render(request, 'core/upload_form.html', {'form': form})
+
                 return redirect('core:all_delegates')
 
             except Exception as e:
@@ -166,21 +175,21 @@ def upload(request):
 
 def get_payment_method_value(payment_method_label):
     for value, label in Payment.PAYMENT_METHOD_CHOICES:
-        if label.lower() == payment_method_label.lower():
+        if label.lower() == payment_method_label.lower().strip():
             return value
     return 'Unknown'  # Default value if no match is found
 
 def get_amount_value(amount_label):
     for value, label in Payment.AMOUNT_CHOICES:
-        if label.lower() == amount_label.lower():
+        if label.lower() == amount_label.lower().strip():
             return value
     return 'Unknown'  # Default value if no match is found
 
 def verify_payments_from_csv(df):
     for index, row in df.iterrows():
-        email = row.get('MAILS')  # Assuming 'MAILS' is the column name for email
-        amount = row.get('AMOUNT')
-        payment_method = row.get('PAYMENT METHOD')
+        email = row.get('mails', '').strip()  # Assuming 'MAILS' is the column name for email
+        amount = row.get('amount', '').strip()
+        payment_method = row.get('payment method', '').strip()
 
         if not email:
             continue  # Skip if email is missing
@@ -193,15 +202,15 @@ def verify_payments_from_csv(df):
             validated_amount = get_amount_value(amount)
 
             if payment:
-                payment.payment_method = validated_payment_method if pd.notna(validated_payment_method) else payment.payment_method
-                payment.amount = validated_amount if pd.notna(validated_amount) else payment.amount
+                payment.payment_method = validated_payment_method if validated_payment_method != 'Unknown' else payment.payment_method
+                payment.amount = validated_amount if validated_amount != 'Unknown' else payment.amount
                 payment.verified = True
                 payment.save()
             else:
                 payment = Payment.objects.create(
                     delegate=delegate,
-                    payment_method=validated_payment_method if pd.notna(validated_payment_method) else 'Unknown',
-                    amount=validated_amount if pd.notna(validated_amount) else 'Unknown',
+                    payment_method=validated_payment_method,
+                    amount=validated_amount,
                     verified=True
                 )
 
@@ -269,8 +278,11 @@ def process_delegate_data(data):
             'status': 'Unassigned',  # All data are unassigned by default
             'captured': row.get('captured') if pd.notna(row.get('captured')) else '2025-02-07'  # Default if empty
         }
+
         Enrollment_data = {k: v for k, v in Enrollment_data.items() if pd.notna(v)}
         Delegate.objects.update_or_create(user_id=row.get('id'), defaults=Enrollment_data)
+
+
 def process_committee_data(data):
     if "committee" not in data.columns or "country" not in data.columns:
         return
@@ -280,6 +292,7 @@ def process_committee_data(data):
             "committee": row.get('committee'),
             "countries": row.get('country')
         }
+
         Committee.objects.update_or_create(committee=row.get('committee'), defaults=committee_data)
 
 

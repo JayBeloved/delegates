@@ -87,6 +87,7 @@ class Payment(models.Model):
         ('Bank Transfer', 'Bank Transfer'),
         ('Portal', 'Portal'),
         ('Remita', 'Remita'),
+        ('Cash', 'Cash')
     ]
 
     AMOUNT_CHOICES = [

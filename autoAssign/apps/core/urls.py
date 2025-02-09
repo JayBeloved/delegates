@@ -12,5 +12,6 @@ urlpatterns = [
     path('verify_payment/<int:delegate_id>/', views.verify_payment, name='verify_payment'),
     path('assign_delegate/<int:delegate_id>/', views.assign_delegate, name='assign_delegate'),
     path('update_delegate/<int:delegate_id>/', views.update_delegate, name='update_delegate'), 
+    path('test_email/', views.test_email, name='test_email'),  # Add this line
     # Add other URL patterns here
 ]

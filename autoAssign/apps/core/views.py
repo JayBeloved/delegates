@@ -1,6 +1,7 @@
 import random
 import datetime
 import pandas as pd
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -132,31 +133,84 @@ def verify_payment(request, delegate_id):
 
 @login_required
 def upload(request):
-    if request.method != 'POST':
+    if request.method == 'POST':
+        form = UploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['file']
+            if not csv_file.name.endswith('.csv'):
+                messages.error(request, 'File is not a CSV type')
+                return render(request, 'core/upload_form.html', {'form': form})
+
+            try:
+                df = pd.read_csv(csv_file)
+                
+                # Process delegate data (existing functionality)
+                process_delegate_data(df)
+                process_committee_data(df)
+
+                # Process payment verification
+                verify_payments_from_csv(df)
+
+                messages.success(request, 'Data uploaded and action successfully carried out.')
+                return redirect('core:all_delegates')
+
+            except Exception as e:
+                messages.error(request, f"Error processing file: {e}")
+                return render(request, 'core/upload_form.html', {'form': form})
+        else:
+            messages.error(request, 'Invalid form data.')
+            return render(request, 'core/upload_form.html', {'form': form})
+    else:
         form = UploadForm()
         return render(request, 'core/upload_form.html', {'form': form})
 
-    form = UploadForm(request.POST, request.FILES)
-    if not form.is_valid():
-        return render(request, 'core/upload_form.html', {'form': form})
+def get_payment_method_value(payment_method_label):
+    for value, label in Payment.PAYMENT_METHOD_CHOICES:
+        if label.lower() == payment_method_label.lower():
+            return value
+    return 'Unknown'  # Default value if no match is found
 
-    csv_file = request.FILES['file']
-    if not csv_file.name.endswith('.csv'):
-        messages.error(request, 'File is not a CSV type')
-        return render(request, 'core/upload_form.html', {'form': form})
+def get_amount_value(amount_label):
+    for value, label in Payment.AMOUNT_CHOICES:
+        if label.lower() == amount_label.lower():
+            return value
+    return 'Unknown'  # Default value if no match is found
 
-    try:
-        # Delegate.objects.all().delete()
-        # Committee.objects.all().delete()
-        data = pd.read_csv(csv_file)
-        process_delegate_data(data)
-        process_committee_data(data)
-    except Exception as e:
-        print(e)
-        messages.error(request, "There was an error uploading your data, please check the table and field names: " + str(e))
-        return render(request, 'core/upload_form.html', {'form': form})
+def verify_payments_from_csv(df):
+    for index, row in df.iterrows():
+        email = row.get('MAILS')  # Assuming 'MAILS' is the column name for email
+        amount = row.get('AMOUNT')
+        payment_method = row.get('PAYMENT METHOD')
 
-    return redirect('core:all_delegates')
+        if not email:
+            continue  # Skip if email is missing
+
+        try:
+            delegate = Delegate.objects.get(email=email)
+            payment = Payment.objects.filter(delegate=delegate).first()
+
+            validated_payment_method = get_payment_method_value(payment_method)
+            validated_amount = get_amount_value(amount)
+
+            if payment:
+                payment.payment_method = validated_payment_method if pd.notna(validated_payment_method) else payment.payment_method
+                payment.amount = validated_amount if pd.notna(validated_amount) else payment.amount
+                payment.verified = True
+                payment.save()
+            else:
+                payment = Payment.objects.create(
+                    delegate=delegate,
+                    payment_method=validated_payment_method if pd.notna(validated_payment_method) else 'Unknown',
+                    amount=validated_amount if pd.notna(validated_amount) else 'Unknown',
+                    verified=True
+                )
+
+            delegate.has_paid = True
+            delegate.save()
+
+        except Delegate.DoesNotExist:
+            print(f"Delegate with email {email} not found.")
+            continue  # Skip if delegate is not found
 
 
 COMMITTEE_MAPPING = {
@@ -294,3 +348,16 @@ def update_delegate(request, delegate_id):
     else:
         form = DelegateForm(instance=delegate)
     return render(request, 'core/update_delegate.html', {'form': form, 'delegate': delegate})
+
+
+def test_email(request):
+    subject = 'Test Email'
+    message = 'This is a test email.'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = ['info.jaybeloved@gmail.com']  # Replace with your email address
+
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+        return HttpResponse('Email sent successfully.')
+    except Exception as e:
+        return HttpResponse(f'Error sending email: {e}')

@@ -12,14 +12,37 @@
             <div class="card-header card-header-primary">
                 <h4 class="card-title">Assignment List</h4>
                 <p class="card-category">Here is a list of all assignments</p>
-                <form method="get" action="">
-                    <div class="input-group no-border">
-                        <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search...">
-                        <button type="submit" class="btn btn-white btn-round btn-just-icon">
-                            <i class="material-icons">search</i>
-                        </button>
+                <p class="card-category">Total Assignments: <span class="badge badge-info">{{ page_obj.paginator.count }}</span></p>
+                <div class="row">
+                    <div class="col-md-6 mt-3">
+                        <form method="get" action="">
+                            <div class="form-group input-group no-border">
+                                <label for="q">Search Delegate Name:</label>
+                                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search...">
+                                <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                                    <i class="material-icons">search</i>
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                    <div class="col-md-6">
+                        <form method="get" action="">
+                            <div class="form-group input-group no-border">
+                                <label for="page_size">Records per page:</label>
+                                <select class="form-control" id="page_size" name="page_size">
+                                    <option value="10" {% if page_size == '10' %}selected{% endif %}>10</option>
+                                    <option value="20" {% if page_size == '20' %}selected{% endif %}>20</option>
+                                    <option value="30" {% if page_size == '30' %}selected{% endif %}>30</option>
+                                    <option value="40" {% if page_size == '40' %}selected{% endif %}>40</option>
+                                    <option value="50" {% if page_size == '50' %}selected{% endif %}>50</option>
+                                </select>
+                                <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                                    <i class="material-icons">filter_list</i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -53,14 +76,19 @@
                             <a href="?page={{ page_obj.previous_page_number }}">previous</a>
                         {% endif %}
 
-                        <span class="current">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                        </span>
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="current">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
+                                <a href="?page={{ num }}">{{ num }}</a>
+                            {% endif %}
+                        {% endfor %}
 
                         {% if page_obj.has_next %}
                             <a href="?page={{ page_obj.next_page_number }}">next</a>
                             <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
                         {% endif %}
+                        
                         <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
                     </span>
                 </div>

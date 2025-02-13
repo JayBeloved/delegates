@@ -3,7 +3,6 @@ import datetime
 import pandas as pd
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib import messages
@@ -53,29 +52,26 @@ def dashboard(request):
 @user_passes_test(lambda user: is_admin(user) or is_delegates_affairs(user))
 def assignment_list(request):
     query = request.GET.get('q')
+    page_size = request.GET.get('page_size', '10')  # Default to 10
     if query:
         assignments = Assignment.objects.filter(delegate__name__icontains=query) | Assignment.objects.filter(delegate__email__icontains=query)
     else:
         assignments = Assignment.objects.all()
-    paginator = Paginator(assignments, 10)  # Show 10 assignments per page
+    paginator = Paginator(assignments, int(page_size))  # Show 10 assignments per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'core/assignment_list.html', {'page_obj': page_obj, 'query': query})
+    return render(request, 'core/assignment_list.html', {'page_obj': page_obj, 'query': query, 'page_size': page_size})
 
 @login_required
 def all_delegates_list(request):
     query = request.GET.get('q')
+    page_size = request.GET.get('page_size', '10')  # Default to 10
     if query:
         delegates = Delegate.objects.filter(name__icontains=query) | Delegate.objects.filter(email__icontains=query)
     else:
         delegates = Delegate.objects.all()
-    
-    # Check if the delegate has paid
-    paid_delegate_ids = Payment.objects.filter(verified=True).values_list('delegate_id', flat=True)
-    for delegate in delegates:
-        delegate.has_paid = delegate.id in paid_delegate_ids
 
-    paginator = Paginator(delegates, 10)  # Show 10 delegates per page
+    paginator = Paginator(delegates, int(page_size))  # Show 10 delegates per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -83,34 +79,111 @@ def all_delegates_list(request):
         'page_obj': page_obj,
         'title': 'All Delegates',
         'description': 'Here is a list of all delegates',
-        'query': query
+        'query': query,
+        'page_size': page_size
+    }
+    return render(request, 'core/delegates_list.html', context)
+
+
+@login_required
+def unverified_delegates(request):
+    query = request.GET.get('q')
+    page_size = request.GET.get('page_size', '10')  # Default to 10
+    unverified_delegate_ids = Delegate.objects.filter(payment__isnull=True).values_list('id', flat=True)
+    if query:
+        delegates = Delegate.objects.filter(id__in=unverified_delegate_ids).filter(name__icontains=query) | Delegate.objects.filter(id__in=unverified_delegate_ids).filter(email__icontains=query)
+    else:
+        delegates = Delegate.objects.filter(id__in=unverified_delegate_ids)
+
+    paginator = Paginator(delegates, int(page_size))  # Show 10 delegates per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'title': 'Unverified Delegates',
+        'description': 'Delegates with unverified payments',
+        'query': query,
+        'page_size': page_size
     }
     return render(request, 'core/delegates_list.html', context)
 
 @login_required
-def paid_delegates(request):
+def paid_unassigned_delegates(request):
     query = request.GET.get('q')
+    page_size = request.GET.get('page_size', '10')  # Default to 10
     paid_delegate_ids = Payment.objects.filter(verified=True).values_list('delegate_id', flat=True)
+    unassigned_delegates = Delegate.objects.filter(id__in=paid_delegate_ids, assignment__isnull=True)
+
     if query:
-        delegates = Delegate.objects.filter(id__in=paid_delegate_ids).filter(name__icontains=query) | Delegate.objects.filter(id__in=paid_delegate_ids).filter(email__icontains=query)
+        delegates = unassigned_delegates.filter(name__icontains=query) | unassigned_delegates.filter(email__icontains=query)
     else:
-        delegates = Delegate.objects.filter(id__in=paid_delegate_ids)
-    paginator = Paginator(delegates, 10)  # Show 10 delegates per page
+        delegates = unassigned_delegates
+
+    paginator = Paginator(delegates, int(page_size))  # Show 10 delegates per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
+
     context = {
         'page_obj': page_obj,
-        'title': 'Paid Delegates',
-        'description': 'Here is a list of all paid delegates',
-        'query': query
+        'title': 'Paid but Unassigned Delegates',
+        'description': 'Delegates with verified payments but not yet assigned',
+        'query': query,
+        'page_size': page_size
     }
     return render(request, 'core/delegates_list.html', context)
+
+
+@login_required
+def paid_assigned_delegates(request):
+    query = request.GET.get('q')
+    page_size = request.GET.get('page_size', '10')  # Default to 10
+    paid_delegate_ids = Payment.objects.filter(verified=True).values_list('delegate_id', flat=True)
+    assigned_delegates = Delegate.objects.filter(id__in=paid_delegate_ids, assignment__isnull=False)
+
+    if query:
+        delegates = assigned_delegates.filter(name__icontains=query) | assigned_delegates.filter(email__icontains=query)
+    else:
+        delegates = assigned_delegates
+
+    paginator = Paginator(delegates, int(page_size))  # Show 10 delegates per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'title': 'Paid and Assigned Delegates',
+        'description': 'Delegates with verified payments and assigned',
+        'query': query,
+        'page_size': page_size  # Pass page_size to template
+    }
+    return render(request, 'core/delegates_list.html', context)
+
+# @login_required
+# def paid_delegates(request):
+#     query = request.GET.get('q')
+#     paid_delegate_ids = Payment.objects.filter(verified=True).values_list('delegate_id', flat=True)
+#     if query:
+#         delegates = Delegate.objects.filter(id__in=paid_delegate_ids).filter(name__icontains=query) | Delegate.objects.filter(id__in=paid_delegate_ids).filter(email__icontains=query)
+#     else:
+#         delegates = Delegate.objects.filter(id__in=paid_delegate_ids)
+#     paginator = Paginator(delegates, 10)  # Show 10 delegates per page
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#     context = {
+#         'page_obj': page_obj,
+#         'title': 'Paid Delegates',
+#         'description': 'Here is a list of all paid delegates',
+#         'query': query
+#     }
+#     return render(request, 'core/delegates_list.html', context)
 
 
 @login_required
 def verify_payment(request, delegate_id):
     delegate = get_object_or_404(Delegate, id=delegate_id)
     payment = Payment.objects.filter(delegate=delegate).first()  # Get existing payment if it exists
+    next_url = request.GET.get('next', reverse('core:unverified_delegates'))  # Get 'next' from request, default to all_delegates
 
     if request.method == 'POST':
         form = PaymentForm(request.POST, instance=payment)  # Use existing payment as instance if available
@@ -122,7 +195,7 @@ def verify_payment(request, delegate_id):
             delegate.has_paid = True
             delegate.save()
             messages.success(request, 'Payment details updated successfully.')
-            return redirect(reverse('core:all_delegates'))
+            return redirect(next_url)
         else:
             messages.error(request, 'There was an error updating the payment details.')
     else:
@@ -300,6 +373,7 @@ def process_committee_data(data):
 def assign_delegate(request, delegate_id):
     delegate = get_object_or_404(Delegate, id=delegate_id)
     committees = Committee.objects.all()
+    next_url = request.GET.get('next', reverse('core:paid_unassigned_delegates'))
 
     if request.method == 'POST':
         committee_name = request.POST.get('committee')
@@ -338,7 +412,7 @@ def assign_delegate(request, delegate_id):
             email.content_subtype = "html"  # Set content type to HTML
             email.send(fail_silently=True)
 
-            return HttpResponseRedirect(reverse('core:paid_delegates'))
+            return redirect(next_url)
 
     context = {
         'delegate': delegate,
@@ -350,12 +424,13 @@ def assign_delegate(request, delegate_id):
 @login_required
 def update_delegate(request, delegate_id):
     delegate = get_object_or_404(Delegate, id=delegate_id)
+    next_url = request.GET.get('next', reverse('core:all_delegates'))
     if request.method == 'POST':
         form = DelegateForm(request.POST, instance=delegate)
         if form.is_valid():
             form.save()
             messages.success(request, 'Delegate details updated successfully.')
-            return redirect(reverse('core:all_delegates'))  # Redirect to the delegates list
+            return redirect(next_url)  # Redirect to previous page
         else:
             messages.error(request, 'There was an error updating the delegate details.')
     else:

@@ -14,7 +14,7 @@
                 <p class="card-category">Here is a list of all assignments</p>
                 <p class="card-category">Total Assignments: <span class="badge badge-info">{{ page_obj.paginator.count }}</span></p>
                 <div class="row">
-                    <div class="col-md-6 mt-3">
+                    <div class="col-md-4 mt-3">
                         <form method="get" action="">
                             <div class="form-group input-group no-border">
                                 <label for="q">Search Delegate Name:</label>
@@ -25,7 +25,7 @@
                             </div>
                         </form>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <form method="get" action="">
                             <div class="form-group input-group no-border">
                                 <label for="page_size">Records per page:</label>
@@ -35,6 +35,22 @@
                                     <option value="30" {% if page_size == '30' %}selected{% endif %}>30</option>
                                     <option value="40" {% if page_size == '40' %}selected{% endif %}>40</option>
                                     <option value="50" {% if page_size == '50' %}selected{% endif %}>50</option>
+                                </select>
+                                <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                                    <i class="material-icons">filter_list</i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <form method="get" action="">
+                            <div class="form-group input-group no-border">
+                                <label for="committee">Filter by Committee:</label>
+                                <select class="form-control" id="committee" name="committee">
+                                    <option value="">All Committees</option>
+                                    {% for committee in committees %}
+                                    <option value="{{ committee.committee }}" {% if selected_committee == committee.committee %}selected{% endif %}>{{ committee.committee }}</option>
+                                    {% endfor %}
                                 </select>
                                 <button type="submit" class="btn btn-white btn-round btn-just-icon">
                                     <i class="material-icons">filter_list</i>

@@ -1,5 +1,6 @@
 {% extends "layouts/base.html" %}
 {% load static %}
+{% load core_tags %}  
 
 {% block title %} Assign Delegate {% endblock %}
 
@@ -92,7 +93,7 @@
                                 <select class="form-control" id="committee" name="committee" onchange="updateCountries()">
                                     <option value="">Select Committee</option>
                                     {% for committee in committees %}
-                                    <option value="{{ committee.committee }}" data-countries="{{ committee.get_countries_list|join:',' }}">{{ committee.committee }}</option>
+                                    <option value="{{ committee.committee }}" data-countries="{{ committee_countries|get_item:committee.committee|join:',' }}">{{ committee.committee }}</option>
                                     {% endfor %}
                                 </select>
                             </div>

@@ -15,6 +15,7 @@ from decouple import config
 from django.core.management import call_command
 from .forms import UploadForm, PaymentForm, DelegateForm
 from .models import Delegate, Committee, Assignment, Payment
+from django.db.models import Q
 
 
 # Define role-based access control functions
@@ -53,14 +54,22 @@ def dashboard(request):
 def assignment_list(request):
     query = request.GET.get('q')
     page_size = request.GET.get('page_size', '10')  # Default to 10
+    committee = request.GET.get('committee')
+
     if query:
         assignments = Assignment.objects.filter(delegate__name__icontains=query) | Assignment.objects.filter(delegate__email__icontains=query)
     else:
         assignments = Assignment.objects.all()
+    
+    if committee:
+        assignments = assignments.filter(committee=committee)
+
     paginator = Paginator(assignments, int(page_size))  # Show 10 assignments per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'core/assignment_list.html', {'page_obj': page_obj, 'query': query, 'page_size': page_size})
+    committees = Committee.objects.all()
+
+    return render(request, 'core/assignment_list.html', {'page_obj': page_obj, 'query': query, 'page_size': page_size, 'committees': committees})
 
 @login_required
 def all_delegates_list(request):
@@ -413,10 +422,19 @@ def assign_delegate(request, delegate_id):
             email.send(fail_silently=True)
 
             return redirect(next_url)
+        
+    # Prepare data for the template
+    committee_countries = {}
+    for committee in committees:
+        assigned_countries = Assignment.objects.filter(committee=committee.committee).values_list('country', flat=True)
+        available_countries = [country.strip() for country in committee.countries.split(',') if country.strip() not in assigned_countries]
+        committee_countries[committee.committee] = available_countries
+
 
     context = {
         'delegate': delegate,
         'committees': committees,
+        'committee_countries': committee_countries,
     }
     return render(request, 'core/assign_delegate.html', context)
 

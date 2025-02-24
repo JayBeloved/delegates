@@ -13,20 +13,15 @@
                 <h4 class="card-title">{{ title }}</h4>
                 <p class="card-category">{{ description }}</p>
                 <p class="card-category">Total Delegates: <span class="badge badge-info">{{ page_obj.paginator.count }}</span></p>
-                <div class="row">
-                    <div class="col-md-6 mt-3">
-                        <form method="get" action="">
+                <form method="get" action="">
+                    <div class="row">
+                        <div class="col-md-4 mt-3">
                             <div class="form-group input-group no-border">
                                 <label for="q">Search Delegate Name:</label>
                                 <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search...">
-                                <button type="submit" class="btn btn-white btn-round btn-just-icon">
-                                    <i class="material-icons">search</i>
-                                </button>
                             </div>
-                        </form>
-                    </div>
-                    <div class="col-md-6">
-                        <form method="get" action="">
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-group input-group no-border">
                                 <label for="page_size">Records per page:</label>
                                 <select class="form-control" id="page_size" name="page_size">
@@ -36,13 +31,22 @@
                                     <option value="40" {% if page_size == '40' %}selected{% endif %}>40</option>
                                     <option value="50" {% if page_size == '50' %}selected{% endif %}>50</option>
                                 </select>
-                                <button type="submit" class="btn btn-white btn-round btn-just-icon">
-                                    <i class="material-icons">filter_list</i>
-                                </button>
                             </div>
-                        </form>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group input-group no-border">
+                                <label for="committee">Filter by Committee:</label>
+                                <select class="form-control" id="committee" name="committee">
+                                    <option value="">All Committees</option>
+                                    {% for committee in committees %}
+                                    <option value="{{ committee.committee }}" {% if selected_committee == committee.committee %}selected{% endif %}>{{ committee.committee }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </form>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -92,21 +96,21 @@
                 <div class="pagination">
                     <span class="step-links">
                         {% if page_obj.has_previous %}
-                            <a href="?page=1">&laquo; first</a>
-                            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+                            <a href="?page=1&q={{ query|default:'' }}&page_size={{ page_size|default:'10' }}&committee={{ selected_committee|default:'' }}">&laquo; first</a>
+                            <a href="?page={{ page_obj.previous_page_number }}&q={{ query|default:'' }}&page_size={{ page_size|default:'10' }}&committee={{ selected_committee|default:'' }}">previous</a>
                         {% endif %}
 
                         {% for num in page_obj.paginator.page_range %}
                             {% if page_obj.number == num %}
                                 <span class="current">{{ num }}</span>
                             {% elif num > page_obj.number|add:'-5' and num < page_obj.number|add:'5' %}
-                                <a href="?page={{ num }}">{{ num }}</a>
+                                <a href="?page={{ num }}&q={{ query|default:'' }}&page_size={{ page_size|default:'10' }}&committee={{ selected_committee|default:'' }}">{{ num }}</a>
                             {% endif %}
                         {% endfor %}
 
                         {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}">next</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+                            <a href="?page={{ page_obj.next_page_number }}&q={{ query|default:'' }}&page_size={{ page_size|default:'10' }}&committee={{ selected_committee|default:'' }}">next</a>
+                            <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query|default:'' }}&page_size={{ page_size|default:'10' }}&committee={{ selected_committee|default:'' }}">last &raquo;</a>
                         {% endif %}
 
                         <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>

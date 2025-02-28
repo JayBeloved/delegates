@@ -194,39 +194,45 @@
         });
 
         fetch('/app/register_delegate/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            body: JSON.stringify(data)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    document.getElementById('message-container').innerHTML = `
-                        <div class="alert alert-success">${data.message}</div>
-                    `;
-                    // Redirect to success page with email query parameter
-                    if (data.email) {
-                        window.location.href = `/app/registration_success/?q=${data.email}`;
-                    } else {
-                        document.getElementById('message-container').innerHTML = `
-                            <div class="alert alert-danger">Error: Email not returned from server.</div>
-                        `;
-                    }
-                } else {
-                    document.getElementById('message-container').innerHTML = `
-                        <div class="alert alert-danger">${data.message}</div>
-                    `;
-                }
-            })
-            .catch(error => {
-                document.getElementById('message-container').innerHTML = `
-                    <div class="alert alert-danger">Error: ${error}</div>
-                `;
-            });
-    });
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify(data)
+})
+.then(response => {
+    if (response.headers.get('Content-Type').includes('application/json')) {
+        return response.json();
+    } else {
+        throw new Error('Unexpected response format');
+    }
+})
+.then(data => {
+    // Handle JSON response
+    if (data.status === 'success') {
+        document.getElementById('message-container').innerHTML = `
+            <div class="alert alert-success">${data.message}</div>
+        `;
+        // Redirect to success page with email query parameter
+        if (data.email) {
+            window.location.href = `/app/registration_success/?q=${data.email}`;
+        } else {
+            document.getElementById('message-container').innerHTML = `
+                <div class="alert alert-danger">Error: Email not returned from server.</div>
+            `;
+        }
+    } else {
+        document.getElementById('message-container').innerHTML = `
+            <div class="alert alert-danger">${data.message}</div>
+        `;
+    }
+})
+.catch(error => {
+    document.getElementById('message-container').innerHTML = `
+        <div class="alert alert-danger">Error: ${error.message}</div>
+    `;
+});
 
     // Function to get CSRF token from cookies
     function getCookie(name) {

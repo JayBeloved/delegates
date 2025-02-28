@@ -1,0 +1,248 @@
+{% extends "layouts/base.html" %}
+{% load core_tags %}  
+
+{% block title %}Delegate Registration{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Delegate Registration</h1>
+    <div id="message-container">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <form id="registration-form">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input type="text" class="form-control" id="phone" name="phone">
+        </div>
+        <div class="mb-3">
+            <label for="delegate_type" class="form-label">Delegate Type</label>
+            <select class="form-control" id="delegate_type" name="delegate_type">
+                <option value="nigerian">Nigerian Delegate (₦70,000)</option>
+                <option value="RUN">Redeemer's University (₦55,000)</option>
+                <option value="foreign">International Delegate ($100)</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Gender</label>
+            <select class="form-control" id="gender" name="gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="mun_experience" class="form-label">MUN Experience</label>
+            <textarea class="form-control" id="mun_experience" name="mun_experience"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="affiliation" class="form-label">Affiliation</label>
+            <input type="text" class="form-control" id="affiliation" name="affiliation">
+        </div>
+        <div class="mb-3">
+            <label for="position" class="form-label">Position</label>
+            <input type="text" class="form-control" id="position" name="position">
+        </div>
+        <div class="mb-3">
+            <label for="department" class="form-label">Department</label>
+            <input type="text" class="form-control" id="department" name="department">
+        </div>
+        <div class="mb-3">
+            <label for="matric_num" class="form-label">Matric Number</label>
+            <input type="text" class="form-control" id="matric_num" name="matric_num">
+        </div>
+        <div class="mb-3">
+            <label for="city" class="form-label">City</label>
+            <input type="text" class="form-control" id="city" name="city">
+        </div>
+        <div class="mb-3">
+            <label for="state" class="form-label">State</label>
+            <input type="text" class="form-control" id="state" name="state">
+        </div>
+        <div class="mb-3">
+            <label for="country" class="form-label">Country</label>
+            <input type="text" class="form-control" id="country" name="country">
+        </div>
+        <div class="mb-3">
+            <label for="zipcode" class="form-label">Zipcode</label>
+            <input type="text" class="form-control" id="zipcode" name="zipcode">
+        </div>
+        <div class="mb-3">
+            <label for="advert" class="form-label">How did you hear about us?</label>
+            <select class="form-control" id="advert" name="advert">
+                <option value="facebook">Facebook</option>
+                <option value="twitter">Twitter</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="instagram">Instagram</option>
+                <option value="friend/colleague">Friend/Colleague</option>
+                <option value="university/institution">University/Institution</option>
+                <option value="ambassador">Campus Ambassador</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="tshirt_size" class="form-label">T-Shirt Size</label>
+            <select class="form-control" id="tshirt_size" name="tshirt_size">
+                <option value="xs">XS</option>
+                <option value="s">S</option>
+                <option value="m">M</option>
+                <option value="l">L</option>
+                <option value="xl">XL</option>
+                <option value="xxl">XXL</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="medical" class="form-label">Medical Information</label>
+            <textarea class="form-control" id="medical" name="medical"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="diet" class="form-label">Dietary Restrictions</label>
+            <textarea class="form-control" id="diet" name="diet"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="referral" class="form-label">Referral Code</label>
+            <input type="text" class="form-control" id="referral" name="referral">
+        </div>
+        <div class="mb-3">
+            <label for="committee1" class="form-label">Committee 1</label>
+            <select class="form-control" id="committee1" name="committee1" onchange="updateCountries(1)">
+                <option value="">Select Committee</option>
+                {% for committee in committees %}
+                <option value="{{ committee.committee }}" data-countries="{{ committee_countries|get_item:committee.committee|join:',' }}">{{ committee.committee }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="country1" class="form-label">Country 1</label>
+            <select class="form-control" id="country1" name="country1">
+                <option value="">Select Country</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="committee2" class="form-label">Committee 2</label>
+            <select class="form-control" id="committee2" name="committee2" onchange="updateCountries(2)">
+                <option value="">Select Committee</option>
+                {% for committee in committees %}
+                <option value="{{ committee.committee }}" data-countries="{{ committee_countries|get_item:committee.committee|join:',' }}">{{ committee.committee }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="country2" class="form-label">Country 2</label>
+            <select class="form-control" id="country2" name="country2">
+                <option value="">Select Country</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="committee3" class="form-label">Committee 3</label>
+            <select class="form-control" id="committee3" name="committee3" onchange="updateCountries(3)">
+                <option value="">Select Committee</option>
+                {% for committee in committees %}
+                <option value="{{ committee.committee }}" data-countries="{{ committee_countries|get_item:committee.committee|join:',' }}">{{ committee.committee }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="country3" class="form-label">Country 3</label>
+            <select class="form-control" id="country3" name="country3">
+                <option value="">Select Country</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    function updateCountries(choice) {
+        const committeeSelect = document.getElementById(`committee${choice}`);
+        const countrySelect = document.getElementById(`country${choice}`);
+        const selectedCommittee = committeeSelect.options[committeeSelect.selectedIndex];
+        const countries = selectedCommittee.getAttribute('data-countries').split(',');
+
+        // Clear the current options
+        countrySelect.innerHTML = '<option value="">Select Country</option>';
+
+        // Add new options
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.trim();
+            option.textContent = country.trim();
+            countrySelect.appendChild(option);
+        });
+    }
+
+    document.getElementById('registration-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(this);
+        const data = {};
+        formData.forEach((value, key) => {
+            data[key] = value;
+        });
+
+        fetch('/app/register_delegate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('message-container').innerHTML = `
+                        <div class="alert alert-success">${data.message}</div>
+                    `;
+                    // Redirect to success page with email query parameter
+                    if (data.email) {
+                        window.location.href = `/app/registration_success/?q=${data.email}`;
+                    } else {
+                        document.getElementById('message-container').innerHTML = `
+                            <div class="alert alert-danger">Error: Email not returned from server.</div>
+                        `;
+                    }
+                } else {
+                    document.getElementById('message-container').innerHTML = `
+                        <div class="alert alert-danger">${data.message}</div>
+                    `;
+                }
+            })
+            .catch(error => {
+                document.getElementById('message-container').innerHTML = `
+                    <div class="alert alert-danger">Error: ${error}</div>
+                `;
+            });
+    });
+
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock javascripts %}

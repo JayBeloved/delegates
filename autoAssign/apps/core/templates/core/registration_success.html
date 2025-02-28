@@ -1,0 +1,28 @@
+4```html
+{% extends "layouts/base.html" %}
+
+{% block title %}Registration Status{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Registration Status</h1>
+
+    <form method="get" action="">
+        <div class="mb-3">
+            <label for="q" class="form-label">Search by Email:</label>
+            <input type="text" class="form-control" id="q" name="q" value="{{ query }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    {% if delegate %}
+        <h2>Delegate Information</h2>
+        <p><strong>Name:</strong> {{ delegate.name }}</p>
+        <p><strong>Email:</strong> {{ delegate.email }}</p>
+        <p><strong>Payment Status:</strong> {% if delegate.has_paid %}Verified{% else %}Not Verified{% endif %}</p>
+        <p><strong>Assignment Status:</strong> {{ delegate.status }}</p>
+    {% elif query %}
+        <p>No delegate found with the name or email "{{ query }}".</p>
+    {% endif %}
+</div>
+{% endblock %}

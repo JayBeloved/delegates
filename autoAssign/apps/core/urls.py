@@ -16,5 +16,7 @@ urlpatterns = [
     path('assign_delegate/<int:delegate_id>/', views.assign_delegate, name='assign_delegate'),
     path('update_delegate/<int:delegate_id>/', views.update_delegate, name='update_delegate'), 
     path('test_email/', views.test_email, name='test_email'),  # Add this line
+    path('register_delegate/', views.register_delegate, name='register_delegate'),
+    path('registration_success/', views.registration_success, name='registration_success'),
     # Add other URL patterns here
 ]

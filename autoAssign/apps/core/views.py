@@ -1,4 +1,6 @@
 import random
+import json
+from django.http import JsonResponse
 import datetime
 import pandas as pd
 from django.conf import settings
@@ -13,7 +15,7 @@ from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required, user_passes_test
 from decouple import config
 from django.core.management import call_command
-from .forms import UploadForm, PaymentForm, DelegateForm
+from .forms import UploadForm, PaymentForm, DelegateForm, DelegateRegistrationForm
 from .models import Delegate, Committee, Assignment, Payment
 from django.db.models import Q
 
@@ -48,6 +50,71 @@ def dashboard(request):
     }
 
     return render(request, 'core/dashboard.html', context)
+
+
+def register_delegate(request):
+    committees = Committee.objects.all()
+    committee_countries = {}
+    for committee in committees:
+        assigned_countries = Assignment.objects.filter(committee=committee.committee).values_list('country', flat=True)
+        available_countries = [country.strip() for country in committee.countries.split(',') if country.strip() not in assigned_countries]
+        committee_countries[committee.committee] = available_countries
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            delegate = Delegate(
+                user_id=generate_unique_user_id(),
+                name=data.get('name'),
+                email=data.get('email'),
+                phone=data.get('phone'),
+                delegate_type=data.get('delegate_type'),
+                gender=data.get('gender'),
+                mun_experience=data.get('mun_experience'),
+                affiliation=data.get('affiliation'),
+                position=data.get('position'),
+                department=data.get('department'),
+                matric_num=data.get('matric_num'),
+                city=data.get('city'),
+                state=data.get('state'),
+                country=data.get('country'),
+                zipcode=data.get('zipcode'),
+                advert=data.get('advert'),
+                tshirt_size=data.get('tshirt_size'),
+                medical=data.get('medical'),
+                diet=data.get('diet'),
+                referral=data.get('referral'),
+                committee1=data.get('committee1'),
+                country1=data.get('country1'),
+                committee2=data.get('committee2'),
+                country2=data.get('country2'),
+                committee3=data.get('committee3'),
+                country3=data.get('country3'),
+                status = "Unassigned"
+            )
+            delegate.save()
+            messages.success(request, 'Registration successful!')
+            return JsonResponse({'status': 'success', 'message': 'Registration successful!', 'email': delegate.email}, status=201)
+        except Exception as e:
+            messages.error(request, f'Error during registration: {str(e)}')
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    else:
+        return render(request, 'core/register_delegate.html',{'committees': committees,'committee_countries': committee_countries})
+
+
+def generate_unique_user_id():
+    import uuid
+    return str(uuid.uuid4())
+
+
+def registration_success(request):
+    query = request.GET.get('q')
+    delegate = None
+
+    if query:
+        delegate = Delegate.objects.filter(name__icontains=query).first() or Delegate.objects.filter(email__icontains=query).first()
+
+    return render(request, 'core/registration_success.html', {'delegate': delegate, 'query': query})
+
 
 @login_required
 @user_passes_test(lambda user: is_admin(user) or is_delegates_affairs(user))

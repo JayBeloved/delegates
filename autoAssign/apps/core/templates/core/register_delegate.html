@@ -13,7 +13,9 @@
         {% endfor %}
         {% endif %}
     </div>
-    <form id="registration-form">
+    <form id="registration-form" method="POST">
+       {% csrf_token %}
+       <!-- Form fields go here -->
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
             <input type="text" class="form-control" id="name" name="name" required>

@@ -1,5 +1,6 @@
+6```html
 {% extends "layouts/base.html" %}
-{% load core_tags %}  
+{% load core_tags %}
 
 {% block title %}Delegate Registration{% endblock %}
 
@@ -14,8 +15,8 @@
         {% endif %}
     </div>
     <form id="registration-form" method="POST">
-       {% csrf_token %}
-       <!-- Form fields go here -->
+        {% csrf_token %}
+        <!-- Form fields go here -->
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
             <input type="text" class="form-control" id="name" name="name" required>
@@ -32,7 +33,7 @@
             <label for="delegate_type" class="form-label">Delegate Type</label>
             <select class="form-control" id="delegate_type" name="delegate_type">
                 <option value="nigerian">Nigerian Delegate (₦70,000)</option>
-                <option value="RUN">Redeemer's University (₦55,000)</option>
+                <option value="RUN" selected>Redeemer's University (₦55,000)</option>
                 <option value="foreign">International Delegate ($100)</option>
             </select>
         </div>
@@ -45,19 +46,19 @@
         </div>
         <div class="mb-3">
             <label for="mun_experience" class="form-label">MUN Experience</label>
-            <textarea class="form-control" id="mun_experience" name="mun_experience"></textarea>
+            <textarea class="form-control" id="mun_experience" name="mun_experience">None</textarea>
         </div>
         <div class="mb-3">
             <label for="affiliation" class="form-label">Affiliation</label>
-            <input type="text" class="form-control" id="affiliation" name="affiliation">
+            <input type="text" class="form-control" id="affiliation" name="affiliation" value="Redeemer's University">
         </div>
         <div class="mb-3">
             <label for="position" class="form-label">Position</label>
-            <input type="text" class="form-control" id="position" name="position">
+            <input type="text" class="form-control" id="position" name="position" value="None">
         </div>
         <div class="mb-3">
             <label for="department" class="form-label">Department</label>
-            <input type="text" class="form-control" id="department" name="department">
+            <input type="text" class="form-control" id="department" name="department" value="HIS">
         </div>
         <div class="mb-3">
             <label for="matric_num" class="form-label">Matric Number</label>
@@ -65,19 +66,19 @@
         </div>
         <div class="mb-3">
             <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city">
+            <input type="text" class="form-control" id="city" name="city" value="Ede">
         </div>
         <div class="mb-3">
             <label for="state" class="form-label">State</label>
-            <input type="text" class="form-control" id="state" name="state">
+            <input type="text" class="form-control" id="state" name="state" value="Osun">
         </div>
         <div class="mb-3">
             <label for="country" class="form-label">Country</label>
-            <input type="text" class="form-control" id="country" name="country">
+            <input type="text" class="form-control" id="country" name="country" value="Nigeria">
         </div>
         <div class="mb-3">
             <label for="zipcode" class="form-label">Zipcode</label>
-            <input type="text" class="form-control" id="zipcode" name="zipcode">
+            <input type="text" class="form-control" id="zipcode" name="zipcode" value="900118">
         </div>
         <div class="mb-3">
             <label for="advert" class="form-label">How did you hear about us?</label>
@@ -87,7 +88,7 @@
                 <option value="whatsapp">WhatsApp</option>
                 <option value="instagram">Instagram</option>
                 <option value="friend/colleague">Friend/Colleague</option>
-                <option value="university/institution">University/Institution</option>
+                <option value="university/institution" selected>University/Institution</option>
                 <option value="ambassador">Campus Ambassador</option>
                 <option value="other">Other</option>
             </select>
@@ -97,7 +98,7 @@
             <select class="form-control" id="tshirt_size" name="tshirt_size">
                 <option value="xs">XS</option>
                 <option value="s">S</option>
-                <option value="m">M</option>
+                <option value="m" selected>M</option>
                 <option value="l">L</option>
                 <option value="xl">XL</option>
                 <option value="xxl">XXL</option>
@@ -105,15 +106,15 @@
         </div>
         <div class="mb-3">
             <label for="medical" class="form-label">Medical Information</label>
-            <textarea class="form-control" id="medical" name="medical"></textarea>
+            <textarea class="form-control" id="medical" name="medical">Nil</textarea>
         </div>
         <div class="mb-3">
             <label for="diet" class="form-label">Dietary Restrictions</label>
-            <textarea class="form-control" id="diet" name="diet"></textarea>
+            <textarea class="form-control" id="diet" name="diet">Nil</textarea>
         </div>
         <div class="mb-3">
             <label for="referral" class="form-label">Referral Code</label>
-            <input type="text" class="form-control" id="referral" name="referral">
+            <input type="text" class="form-control" id="referral" name="referral" value="Department">
         </div>
         <div class="mb-3">
             <label for="committee1" class="form-label">Committee 1</label>
@@ -199,7 +200,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken') // Make sure this is correct
+                'X-CSRFToken': '{{ csrf_token }}' // Use the token from the template context
             },
             body: JSON.stringify(data)
         })
@@ -229,22 +230,5 @@
                 `;
             });
     });
-
-    // Function to get CSRF token from cookies
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
 </script>
 {% endblock javascripts %}

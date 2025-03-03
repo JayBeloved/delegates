@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assignment Report - RUIMUN</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
+            color: #2c3e50;
+            background: #f8f9fa;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 794px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #34495e;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .header h2 {
+            font-size: 1.4em;
+            color: #34495e;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            padding: 12px;
+            font-weight: 600;
+            text-align: left;
+            font-size: 1.1em;
+        }
+
+        td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            font-size: 1.1em;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Redeemer's University International Model United Nations</h1>
+            <h2>Assignment Report</h2>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Delegate</th>
+                    <th>Committee</th>
+                    <th>Country</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assignment in assignments %}
+                <tr>
+                    <td>{{ assignment.delegate.name }}</td>
+                    <td>{{ assignment.committee }}</td>
+                    <td>{{ assignment.country }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,6 +1,8 @@
 import random
 import json
-from django.http import JsonResponse
+# import io for the generation of PDF
+import io
+from django.http import JsonResponse, FileResponse
 import datetime
 import pandas as pd
 from django.conf import settings
@@ -18,6 +20,8 @@ from django.core.management import call_command
 from .forms import UploadForm, PaymentForm, DelegateForm, DelegateRegistrationForm
 from .models import Delegate, Committee, Assignment, Payment
 from django.db.models import Q
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 
 # Define role-based access control functions
@@ -523,6 +527,41 @@ def update_delegate(request, delegate_id):
     return render(request, 'core/update_delegate.html', {'form': form, 'delegate': delegate})
 
 
+@login_required
+def generate_assignment_pdf(request):
+    committee = request.GET.get('committee')
+
+    assignments = Assignment.objects.all()
+
+    if committee != "ALL":
+        assignments = assignments.filter(committee=committee)
+    
+
+    # Render the HTML template with the assignment data
+    html_string = render_to_string('core/assignment_report.html', {'assignments': assignments})
+
+    # Create a file-like buffer to receive PDF data.
+    buffer = io.BytesIO()
+
+    # Use WeasyPrint to convert the HTML to PDF
+    html = HTML(string=html_string)
+    html.write_pdf(buffer)
+
+    # Reset buffer position to the beginning
+    buffer.seek(0)
+
+    # Return the PDF file
+    response = HttpResponse(buffer.read(), content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="assignment_report.pdf"'
+
+    return response
+
+
+@login_required
+def assignment_report_form(request):
+    return render(request, 'core/assignment_report_form.html')
+
+
 def test_email(request):
     subject = 'Test Email'
     message = 'This is a test email.'
@@ -534,3 +573,4 @@ def test_email(request):
         return HttpResponse('Email sent successfully.')
     except Exception as e:
         return HttpResponse(f'Error sending email: {e}')
+    

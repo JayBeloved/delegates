@@ -18,5 +18,7 @@ urlpatterns = [
     path('test_email/', views.test_email, name='test_email'),  # Add this line
     path('register_delegate/', views.register_delegate, name='register_delegate'),
     path('registration_success/', views.registration_success, name='registration_success'),
+   path('assignment_report_form/', views.assignment_report_form, name='assignment_report_form'),
+    path('generate_assignment_pdf/', views.generate_assignment_pdf, name='generate_assignment_pdf'),
     # Add other URL patterns here
 ]

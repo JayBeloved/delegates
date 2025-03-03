@@ -25,6 +25,7 @@ gunicorn = "*"
 sentry-sdk = "*"
 whitenoise = "*"
 psycopg2-binary = "*"
+weasyprint = "*"
 
 [dev-packages]
 
